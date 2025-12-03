@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FernanFrios Delivery</title>
+    
+    <!-- Favicon adicionado -->
+    <link rel="icon" type="image/png" href="fernafrios/favicon.png">
+    <link rel="shortcut icon" href="fernafrios/favicon.png" type="image/png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f7f7f7;
+            -webkit-tap-highlight-color: transparent;
+            padding-bottom: 80px;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .category-item.active {
+            background-color: #ea1d2c;
+            color: white;
+            border-color: #ea1d2c;
+        }
+
+        .product-card-img {
+            aspect-ratio: 1;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up {
+            animation: slideUp 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        .ripple:after {
+            content: "";
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+            background-repeat: no-repeat;
+            background-position: 50%;
+            transform: scale(10, 10);
+            opacity: 0;
+            transition: transform .5s, opacity 1s;
+        }
+        .ripple:active:after {
+            transform: scale(0, 0);
+            opacity: 0.3;
+            transition: 0s;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- App Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <!-- Logo atualizado com o favicon -->
+                <div class="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center shadow-sm border border-gray-100">
+                    <img src="fernafrios/favicon.png" alt="Logo FF" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold text-gray-800 leading-tight">FernanFrios</h1>
+                    <div class="flex items-center text-xs text-gray-500 cursor-pointer">
+                        <span>Ver catálogo completo</span>
+                        <i class="fas fa-chevron-right ml-1 text-[10px]"></i>
+                    </div>
+                </div>
+            </div>
+            <button class="text-red-600 p-2 relative">
+                <i class="fas fa-bell"></i>
+                <span class="absolute top-1 right-1 w-2 h-2 bg-red-600 border-2 border-white rounded-full"></span>
+            </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="px-4 pb-3">
+            <div class="relative">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="searchInput" placeholder="Buscar em FernanFrios..." 
+                    class="w-full bg-gray-100 text-gray-700 text-sm rounded-lg py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-red-100 focus:bg-white transition-all">
+            </div>
+        </div>
+
+        <!-- Category Nav (Horizontal Scroll) -->
+        <div class="border-t border-gray-100">
+            <div class="flex overflow-x-auto no-scrollbar py-3 px-4 gap-3" id="categoryList">
+                <!-- Categories injected by JS -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-4">
+        
+        <!-- Banner Capa (Atualizado) -->
+        <div class="mb-6 rounded-xl overflow-hidden shadow-md bg-white">
+            <img src="fernafrios/capa.PNG" alt="Capa FernanFrios" class="w-full h-auto object-cover block">
+        </div>
+
+        <!-- Section Title -->
+        <div class="flex justify-between items-end mb-4">
+            <h2 class="font-bold text-lg text-gray-800" id="sectionTitle">Destaques</h2>
+            <span class="text-xs text-gray-500" id="itemCount">0 itens</span>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="grid grid-cols-1 gap-4 pb-20" id="productGrid">
+            <!-- Products injected by JS -->
+        </div>
+
+    </main>
+
+    <!-- Floating Cart Bar (Sticky Bottom) -->
+    <div id="cartBar" class="fixed bottom-0 left-0 w-full bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 transform translate-y-full transition-transform duration-300 p-4 pb-6">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex flex-col">
+                <span class="text-xs text-gray-500">Total sem taxa de entrega</span>
+                <span class="font-bold text-lg text-gray-900" id="cartTotal">R$ 0,00</span>
+                <span class="text-xs text-green-600" id="cartCount">0 itens</span>
+            </div>
+            <button onclick="openCheckout()" class="bg-red-600 hover:bg-red-700 text-white font-medium px-8 py-3 rounded-lg shadow-lg flex items-center gap-2 ripple transition-colors">
+                <span>Ver Sacola</span>
+                <i class="fas fa-shopping-bag"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden items-end sm:items-center justify-center backdrop-blur-sm transition-opacity opacity-0">
+        <div class="bg-white w-full sm:w-[500px] sm:rounded-2xl rounded-t-2xl max-h-[90vh] flex flex-col transform transition-transform translate-y-full sm:translate-y-10" id="modalContent">
+            
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                <h3 class="font-bold text-lg">Finalizar Pedido</h3>
+                <button onclick="closeCheckout()" class="text-gray-400 hover:text-gray-600 p-2">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div class="p-4 overflow-y-auto flex-1">
+                <div id="cartItemsList" class="space-y-4 mb-6">
+                    <!-- Cart items injected here -->
+                </div>
+
+                <div class="border-t border-gray-100 pt-4 space-y-2 mb-6">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Subtotal</span>
+                        <span class="font-medium" id="modalSubtotal">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Taxa de entrega</span>
+                        <span class="text-green-600 font-medium">A combinar</span>
+                    </div>
+                    <div class="flex justify-between text-lg font-bold text-gray-900 pt-2">
+                        <span>Total</span>
+                        <span id="modalTotal">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <form id="checkoutForm" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Seu Nome</label>
+                        <input type="text" id="customerName" required class="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none" placeholder="Ex: João da Silva">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Endereço de Entrega</label>
+                        <textarea id="customerAddress" required rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none" placeholder="Rua, Número, Bairro, Complemento"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Método de Pagamento</label>
+                        <select id="paymentMethod" class="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm outline-none">
+                            <option value="Pix">Pix</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Cartão de Débito">Cartão de Débito</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-gray-100 bg-white sm:rounded-b-2xl">
+                <button onclick="sendOrder()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 rounded-lg shadow-md flex items-center justify-center gap-2 transition-transform active:scale-[0.98]">
+                    <span>Enviar Pedido no WhatsApp</span>
+                    <i class="fab fa-whatsapp text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full shadow-lg z-[70] flex items-center gap-2 text-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <i class="fas fa-check-circle text-green-400"></i>
+        <span id="toastMsg">Produto adicionado</span>
+    </div>
+
+    <script>
+        /* --- DADOS --- */
+        // Dados originais extraídos (com adição de preços mockados para a experiência)
+        const rawProducts = [
+            { name: "ACHOCOLATADO LIDER 1 LITRO C/12", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkf5h3pwKw6rplEURZGUBd_SZl1YBWAwFCgsVvWcAqOYDHWczI6rnfaYAcrzwNfrCfxAHnFbIBZWmkqB90QoOBFsWChz7dklUBhGWUFP23txE3Twkgvq1lJeZwwkkXoG6vIYULhxy04mEP_xoiGoYc7x4dgq816KOs6j3BoSf29w-lfDkZDhZdVqs8M=w1280", price: 89.90 },
+            { name: "ACHOCOLATADO LIDER 200ML C/27", desc: "SOMENTE CAIXA FECHADA", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkfOeMz3EiIn2uKiASdy_q7G36IfTGmqAdSkFN1ThfW4YnZptiR40bNDwuUl-uz05mgs8exUJavut8mC_Qd5wvtA7TI305vZB42WID2gVuu5kAIKfZAuI8PzBe_Gpd0DvgFZsDjgO-_td6IFoXjqNfsQxJxe5W1pLy8eBIjQRDDlkoeKsxBS5eldhIU=w1280", price: 45.00 },
+            { name: "ACHOCOLATADO MOCOQUINHA 200ML C/27", desc: "SOMENTE CAIXA FECHADA", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkfK3UrsXRP4yeC6yov1JW4BCaobQksCtA5Tqc_duv51CjxdjXqQpkphEzTAgNzCLgiGLaWPhCrj8CAJ1h21rdbwnEhEz9wJJHuz55dbpV4aDsGcPpgHt8DH6jprzqnd-uuKrr6QWjYvfW1RgHlw12vRjZI9KD8NhnoSoRgZlYpnIDh2CZT__PVzRYw=w1280", price: 52.90 },
+            { name: "ACHOCOLATADO NESCAU 180ML C/27", desc: "SOMENTE CAIXA FECHADA", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkdRv_mmwQRR-HvxIUa3WXfyU6BFeQzU-V4vNh2Gq1KfHW91C8CHoYKWsX_0Y_AvN9QMyIKatyxLLc3XOgJYD4Ct_SRigtSedMssFx04zg0DdJk4SjScGBgL-nVuIiT5Vq3Hupr0pEgYg6WxYmTp4yaD1hFzlTWXKyBghW23_7KMLw1bQOAHPNzEY4M=w1280", price: 65.00 },
+            { name: "ACHOCOLATADO PIRACANJUBA 200ML C27", desc: "SOMENTE CAIXA FECHADA", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkds5NSzNCrejdVxnzgor1hBY9w3kl4CMKIDqf0sbPfrQSE9fR_6z-xGQSbWFo3YXrWQlzyEbqTbHKJz5IMaTAmQNrI-j97z5UuEcMQv3vuQYB2Mwsev6JR_oQ9QJ6gZna5yiH_3qgOWAkAGyu-VQc52aWN850rlbY5OINsA9pzPlF5GwRgk_O6VcBNfA2YlwTmpUqZ5uleYcNBiWQq8oWdcYQeUz_ZwNDUNxO8=w1280", price: 58.00 },
+            { name: "ACHOCOLATADO TODDY EM PÓ 200G C/24", desc: "SOMENTE CAIXA FECHADA", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkdiPFjqLGOBXHVsG9RBHzTvxuy4BaJuphowZS18FKnuiU3UhFG2ZggicV8TTR6NhwtA1ux-a0AArd49_zQ_spk1ic7fwmthe0ppuz_D-v7367yAVw7ln1BndpUJOI6h1daV5Shg-o86a87Jz49mS438Dp-OlRW2XkZgDF26my3NFzs71VrLXiLc=w1280", price: 110.00 },
+            { name: "ACHOCOLATADO TODDYINHO 200ML C/27", desc: "SOMENTE CAIXA FECHADA", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkcvwsY2CAezbLdK2vdkmybhun-R-Pxw_tvTP6BdsGO7eXAVLdN9FtuikRxbiDqWwwK-5m7kW_1t8WeuYQHTwGwa1ZjXlzSAxljAwjnsj_nnCJEKBrkshPk6Ea32xbhFar6tJ2AWGaOwTvVkmaemqFUGBYLsr0h-L1ijaeC_o7V48CRUqDxhJ2OJnnc=w1280", price: 68.90 },
+            { name: "AGUA COM GAS LEVE 490ML C/12", desc: "SOMENTE NO FARDO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkdAOxVMrXyDce8AmYyCWtrNW_V7lwnaqr3YMhs2xTW7tlHUp5WwcCeXm2a5OZpKhk4hBIJgrMtfzeAKIF17vO3Prhk1lJ3oeqB1A8ZL-XBsP40l7T9qCM9imqSafFgADqyhxgeMKJjO_IxMgcARhM-APLMSoWhnSJq1aaPePLnbkYXYLioEWzEHD1o0fR974_3h-eNLNFWa17DXdq-YCXX8P5rXc0w5IKgN_CE=w1280", price: 18.00 },
+            { name: "AGUA DE COCO QUADRADO TP 200ML C/27", desc: "SOMENTE NO FARDO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkcgIm0UQG0XWdJFme8BDMvur64NQo2sTaXim0lp91r0U5MLLWdBnkx-Q_yu0FCpP2vicnhdRg6dSuRf21nWtPG5UchNk3OGEdPqPRTZ8_lhFLR1gJBgLts-YP-BkGqLzaeDF6m0d87bt4mh0fhLf7ysoYKG4PrXymE-PNFWPqsOwEYUlsR7L5Hf=w1280", price: 54.00 },
+            { name: "AGUA LEVE 1.5 LITRO C/6", desc: "SOMENTE NO FARDO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkcxSC8enoxiNGby7vOWpkQUi2bkcJzozPHH0MAp3qN0ijNacg23SUcWT9gK2SGOQbfVNdXvgV9Kv7hATN-awtYm7tjAtn_j5V8oFDJDaTPwNyGbD9AeAWsZJfqXykBSVU-FOWKb4dSv6SAosPK0XKfQqEnC-xOU_nlaRkwInUHExC5K3SXlfcHF90-ynaVqTWe4IN9PwAJtX-xyJN7n0kOSkXVRKIS4jZdu-LI=w1280", price: 12.00 },
+            { name: "AGUA LEVE 510 C/12", desc: "SOMENTE NO FARDO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkedozNk2CavzG0JWgLhLZNpphs21A8s1tjgBmJAGGG57nn9ASVdFa6YyWnR3xqVVXFVePbhOvCWbFGaV7xz4OCEYokgx6ymqwZgDpq-WIiE1EYO1gcctpWkl4oLcnbn_bFWhBNWJ8YMxzKbROqS2AlHqBUTuxCF1a1-giKOsB8wOIoULoqY4n8xw6xPGBYvIo0GMC9teG39BqRLfTKMLx_sjxWKz7XMQGRxNy4=w1280", price: 10.50 },
+            { name: "AGUA SANITARIA SUPREMA 1 LITRO C/12", desc: "SOMENTE CAIXA FECHADA", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkex5mUwnJq0rBo7_OHQ-39B47caK2qqBMYeCcMRp7-KJhb0tDcSajazEg-7X3Qi9z7U3YwfDL5NL8eCnKIvsz5UNb5S3Prh6WT8ZOR8Mhxj21FcPC9dnoahIh69Nlltls1cWO2Puwhac6O_0QbzPFG7RlVMJHqRpdWjrLEt-Lc96aYwmDFqcWwB-t0hg2qvo00zyUmooNPEOHBGsvfR6T1McLN-Kc4RAHDV=w1280", price: 35.90 },
+            { name: "AGUA SANITARIA 5 LITROS SUPREMA C/3", desc: "SOMENTE CAIXA FECHADA", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkfWw2CTjnTZFvH0QLWM0hE-rlwRtKg5iuNxXtZLcTqAK6CPmBTBPBHLAuT3_Smw3Y4V0GmTv8IXdk43tmXyhp38jPhNvZokRAmZVVsRc-jjzd_blFlWqwNuJ7oiCWPVdCAfHpTbsMVhTM55Yzz8TaIPk4569Jb7nYPDQL0x5e7HFXpBkwpsiYryEy_YZJFPNTdjOayNRYcOcVGYRfxOZ_YhQPlZoSDdd8OG-rs=w1280", price: 42.00 },
+            { name: "AJINOMOTO BOA MESA 500G", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCke6IawbMroz33bZoOi_7q-hQZaxdH6Vf-LmqSJBABCBNJPyOp23TnRBbg6Nh_j9vwTVc8wxNKi78PvXwRIPgD3uHtNPV-w3-XEEPFnhkbz52haJilEG_BSJbg2XTZHoPHl6duxkSv12_IDe3mfUm5LNr1hKKZoAqupgaxx-12V7bNL8f2h_1Ja426n4r-B7sdaFzdkphAt7paLIEY7qzpCYXZwbKqbdvW3MKoQ=w1280", price: 15.90 },
+            { name: "ÁLCOOL UZU CLEAN 70% 1 LITRO C/12", desc: "SOMENTE CAIXA FECHADA", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkfHYCcOEa2GDeiXIF3Z3MwUWv9ZuAzB0fmG6TazEG5VBxQboXrGx7IUYKeKFLxp6Zbk_68zVHw5e69v2H4JYB9SzMM02sZcFtqBN9h6ctozyDuAJyfbSwLMywnG_RcB7XNXHZAoPimYEI_zYScPFA4D1H-NXoENQC537_KTsYN6vAyKAphf0OHqttk1WUoVPJ5GCSgiInFEgDD3c9ibxTPD1pWE_gniDWN9=w1280", price: 69.90 },
+            { name: "ALHO FRITO 500G", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkdTG2KdS5N66EQq5nhbd0WMRMbHyIRT4OCEbEiFBtXKlJd1Mx8uwF8BNUezVY_bxxRznc5lf60qvYqeYQmRtf2zitbEmOEwabkZ1mOGUoiWtcmXDF7WKkBrgwFEbkZ-BPtVsIZ6vgMus6NA2855LULqlCIEpx5Y8Dpl0RC4dyba07nGL4IlOCHwKIUxIdZ8H2SXFTNf5kuUIOoVTtTswIHifHaCi1PPh9ApUSA=w1280", price: 22.50 },
+            { name: "ALHO INTEIRO EASYCHEF 1,10KG C/5", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkfi2fwjjJM91-TJpvfJR0Adyw91QIjBRrjmspYCK3ZHNe0dK2JZkyObjlpt9lylXMHYK54OS9kB0lrB8s_oD3pa4-1mIr3SsBij422LL8hTSXJ6kNhqw6sjeUP0mg0yw84MUVVBQRvdRLrvuef_uWO37zkbumtbN_f6JszKvMTWqeBR6eQqfpqdwQb9gumDSxAXByrXt7GvofYE49FR8r2RxM4_fMA_t7lC=w1280", price: 38.00 },
+            { name: "ALHO PASTA 300G BOA MESA C/24", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkfnoXw9CIdeez54zflfdJRKzKJa5sPS7ewA7w6OK54Iw0z0tzz3HnmFmEn4uMrDfeuoO9mQX2Ghe3raBEP3vZCA7mzrZUCM-MXPA7aSPFtIXAo5YyO4XwKUcBmSfKDDfWDgdiSGdkJ30QSzeyHSGxtZHistg2Ohi8vwSvDKPpNN8OwRt_WBkEsiJdjPCT_YkI0ilPouNeYKiQuWJBHv7fy6C6aB9gq6PKRDQEk=w1280", price: 8.90 },
+            { name: "ALMONDEGA DE CARNE BRASA 500G C/18", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkdGBFe9EXVlSuvPQ1_PeTktjyPugi2cLq7mxJHnuJwhQP-wxNfArFOi-VRPhhEEitCRgetH8mLLx-guecXphjHOARqyoghzcrGxkUqpMKShWobItGRv_S8mpS0KX3Hl2Aun-lZLE4MDU_n6b30kyqVGnyAV52N7dcUYgwPhHituXoKyL99jv9qE=w1280", price: 14.50 },
+            { name: "AMACIANTE DE CARNE BOA MESA 1 KG", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkemtHac1vt3qP4FOpmCHKW1KjGJtXGbRKmv0qVFWEYYYHWyShYYBnv9S8uKH2Fkmj-WTpOCSpZ7x5v9UVbOGwvK71bjYpTfj0s7k1Fv0k92ka46j5446iDOEsQa4g3XarpIZl5KgCu8HTCWVxsRPbdM5dgUApuABi15lJFtRqlNa6jlXTiYbOYl=w1280", price: 12.00 },
+            { name: "Amaciante de Roupa Suprema 2 Litros c/6", desc: "Somente Caixa Fechada", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkc15ZLiNnATa8kyh1SSy9hxC8Ck8uljlcmQengNzlGvOoGctRZS6WmWEXJbF51kUzrdQoQBMUm4XKZvoiZDAQJIxZC14LNzx9HqFdisRAAbTLDv89fic4_f7x4TkMzeWH2Eg2j0ezB77WZ1WQzFWzX8SEMGmSLJsmNXJfb-uxtN9RwZZZ7kKtTJNc2kCMCRhAq5EnELAn08V7K3O4gQ7lwoXJUtroSo5z3O=w1280", price: 48.00 },
+            { name: "AMENDOIM CROCANTE TRADICIONAL POTE 130G", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkdYiXmjA0IKO1uBtxLgfwEtmXV7aIGlYMwFD-bmtY54B-nY4TPuq--RPTIhtuTLIHq3hy84LCOWxoZiBLkp_nU59v9XJWm8zx24VLrTNVx6QkPERIWvrtFH_OUcJm6N2jIupsADuRL_MIDA9KJDUS1S2EnJX_ZkPuJUuudRnyMlLE-5SKtBXG8DFfmcvl0oAB-3NMHqrOnrJ1uj2xtaZi7RIWq0WN7Izv5tSwU=w1280", price: 7.50 },
+            { name: "AMIDO DE MILHO BOA MESA 1KG C/10", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkeLw1e1d6KoV7sTYKyaq-UVnZLtIcB4vA0aQZ9G3p_oAZoYgBlMkSKCA60p2jlXZaVKapN4OuVlJDNM8siy6x9__ru2y9TX4aB-9jYsnogFE5c-zqBtSPJ5N6gFI9_PqcBeFmPXpdnzeaDkJB7zYP3PZtqq5wfdPppck2A6hHewwzM7UGo3a8iyRPs4ZogBW_tknMsqs4tTH_3TH0vMK1o_KNh3DwDd69ois70=w1280", price: 8.90 },
+            { name: "ANEL DE CEBOLA BEM BRASIL 1,05KG C/6", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkdDwwXnj8u5UlV2uGbu-aQHKVeknjy0wVZ0yTlmTqi_lAYXmA_qYMmhEUdwyuGdeAue6IhIUdNQNcz1CB82_SsUPiPs-5e3Qc_-XgBfr7GcDRucyruusHlTTt8Y6j5Ckue_JtpK3d-2W2lgxJpDlbNnTtC72Fh5e2JhqPRjnfuWlhJFa7jNQ8LEQtSXcz8dNuo0FNv86XCpDr66fWHIqk9Ut2ppkCnCkDFL5mg=w1280", price: 28.90 },
+            { name: "APRESUNTADO AURORA C/2", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkftO20_vo-wElb-sikQll76HPtbz9_GzobhYZHUDEnSwUwaHfn2y9crt0CES2si718VP_9pn_TWIVSlLFtVe4uIdZghhraI93A2R7WtF7nlB0k28MH1YX_77r2eWMUScwrjrhlVx4PTN3UNP6gbimMHHyx9w7SdSq_z6FlmQvNj6341COXlIs47NxU=w1280", price: 29.90 },
+            { name: "APRESUNTADO PERDIGÃO C/2", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkd3NrzFwD9nliF26CXe0quRdOtCsaJOKtYJ6aNkI9rzAh79N9v_uGKRlQzrE42sWrJvEi1lhObxb-6AIY19evhlrMNeSqGY93ejnuiidGJbD4jHKTz_3Pxa3TIICIX-4XM2uqE3C06u4-vR7JmStpfsbrAwOVgkEGY7LJ8ya8pex75Kb-Mt174NuC4=w1280", price: 34.50 },
+            { name: "ARROZ GUACIRA 5KG C/6", desc: "SOMENTE NO FARDO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkd5-NqhP06K0fypk3eFoQhJ6OZksxURRKv6IpMAv7xEPtgSimcG7_gHzpi9-i3H0JC_bd4nELY_Y0UXC4Mf5H1b0_Y3Zqcb4loGYuTHw2YiYzgC25k1Vr3JOHYbdctRloHuWDH2rDBfC5VpjmxFeXr4I1kEND3xg3idbhEQ0BDWyvgGGcdku8Oi=w1280", price: 26.90 },
+            { name: "ASA CONFINA 1KG C/18", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkexIZ1vngtMbOQqnvzw0D8iaiVV5bFNS9GxoGuhv_ZxxZghC1lA8-mvX6NzPQ4yN6If9myKk1yIVpXjT0ceshe9lcUkeJWDzwmcyB8mQEIFY7hmu0EIacmmQsFiaQQe80TtBYl5buqMCYoSSCur8a8nkQ8TdMh4GwgsCh_qbVtGGkvKAeLZ7t1M=w1280", price: 18.50 },
+            { name: "ATUM RALADO OLEO 88 LATA 140G C/24", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkc6BQJ9oZQwoZIM4-6He1ZchUkMeUP4_Fd07uEIUrcnD1NZBNIIWFz7huGWhZzWj7jmleIFwZjx4sEGjSaQ4Wl0q_QdjM1QOtPOgWtq5bIFdw6NZMV-TQuCL49zJxJxjKwlYxcTC4v-y1Nc1-7wh1fB3STbksAAjc32ED-g_jnFcchciCfpeT585ke2AVdjLMi1jU1inyVcCPTtELliIXBRbF8hMZovXEMU=w1280", price: 6.90 },
+            { name: "AZEITE COMPOSTO LISBOA GALÃO 5,02 LITROS", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkd9h4SzZrEEJXURutHNae_n_Ey1NN1e-OVoLOBHnThLQk8aVK6uI3LBFQBe-CA9p97mmhm4F5Jl8MZ-KdRJBVxMaM7e1hcAr1CrDosLE-8wpWcOtqQ4ljmA1qGLjt5R65QPP889AiDW9ArcER2blU8Gn_hLKTNXKtjsTSIr_lr-hOABBYDjZM1BAcw=w1280", price: 150.00 },
+            { name: "AZEITONA PRETA VALE FERTIL BALDE 2KG", desc: "VENDO FRACIONADO", img: "https://lh3.googleusercontent.com/sitesv/AAzXCkcZYFSnc5izrCY_Zo9VpaAAYMkyHZBIuQFKv0R_BGSkAbfAUoJ4FgRx6kOZU6b6tbeRlICLrUFw0SsdTXPUncqgkVgiMeixU_o9Gh3yh6DdKyVCGtx8x6CXJrDocVUJHAn3yevMulW4cjVxK-l4-wlTXPnpsb0W0Vfq_52BcL8Ml8BmuXytZyk2ahY=w1280", price: 42.00 }
+        ];
+
+        // Estado da Aplicação
+        let cart = {}; // ID -> { ...product, qty }
+        let currentCategory = 'Todos';
+
+        /* --- LÓGICA DE CATEGORIZAÇÃO --- */
+        const categorizedProducts = {
+            'Todos': rawProducts,
+            'Achocolatados': rawProducts.filter(p => p.name.includes('ACHOCOLATADO')),
+            'Águas': rawProducts.filter(p => p.name.includes('AGUA') || p.name.includes('ÁGUA')),
+            'Frios & Carnes': rawProducts.filter(p => p.name.includes('APRESUNTADO') || p.name.includes('CARNE') || p.name.includes('ALMONDEGA') || p.name.includes('ASA')),
+            'Mercearia': rawProducts.filter(p => p.name.includes('ARROZ') || p.name.includes('AMIDO') || p.name.includes('AZEITE') || p.name.includes('ATUM')),
+            'Temperos': rawProducts.filter(p => p.name.includes('ALHO') || p.name.includes('AJINOMOTO') || p.name.includes('AMACIANTE')),
+            'Limpeza': rawProducts.filter(p => p.name.includes('SANITARIA') || p.name.includes('ÁLCOOL') || p.name.includes('AMACIANTE DE ROUPA'))
+        };
+
+        const categories = Object.keys(categorizedProducts);
+
+        /* --- INICIALIZAÇÃO --- */
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCategories();
+            renderProducts();
+            setupSearch();
+        });
+
+        /* --- RENDERIZAÇÃO --- */
+        function renderCategories() {
+            const list = document.getElementById('categoryList');
+            list.innerHTML = categories.map(cat => `
+                <button 
+                    onclick="selectCategory('${cat}')" 
+                    class="category-item whitespace-nowrap px-4 py-2 rounded-full border border-gray-200 text-sm font-medium transition-colors ${cat === currentCategory ? 'active' : 'bg-white text-gray-600 hover:bg-gray-50'}">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function selectCategory(cat) {
+            currentCategory = cat;
+            renderCategories();
+            renderProducts();
+            // Scroll to active button
+            const activeBtn = document.querySelector('.category-item.active');
+            if(activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+
+        function renderProducts(filterText = '') {
+            const grid = document.getElementById('productGrid');
+            const title = document.getElementById('sectionTitle');
+            const count = document.getElementById('itemCount');
+
+            let products = categorizedProducts[currentCategory];
+
+            // Filtro de busca (sobrepõe categoria se houver texto)
+            if (filterText) {
+                products = rawProducts.filter(p => p.name.toLowerCase().includes(filterText.toLowerCase()));
+                title.innerText = `Resultados para "${filterText}"`;
+            } else {
+                title.innerText = currentCategory;
+            }
+
+            count.innerText = `${products.length} itens`;
+
+            grid.innerHTML = products.map((product, index) => {
+                const qty = cart[product.name]?.qty || 0;
+                const isBox = product.desc.toLowerCase().includes('caixa');
+                
+                return `
+                <div class="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex gap-3 animate-fade-in" style="animation-delay: ${index * 50}ms">
+                    <div class="w-24 h-24 flex-shrink-0 bg-gray-50 rounded-lg p-2 flex items-center justify-center relative">
+                        <img src="${product.img}" alt="${product.name}" class="product-card-img w-full h-full" onerror="this.src='https://placehold.co/100x100?text=Sem+Foto'">
+                        ${isBox ? '<span class="absolute top-0 left-0 bg-orange-100 text-orange-700 text-[10px] font-bold px-1.5 py-0.5 rounded-br-lg rounded-tl-lg">CX FECHADA</span>' : ''}
+                    </div>
+                    
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-900 leading-snug line-clamp-2 mb-1">${product.name}</h3>
+                            <p class="text-xs text-gray-500 line-clamp-1">${product.desc}</p>
+                        </div>
+                        
+                        <div class="flex justify-between items-end mt-2">
+                            <div>
+                                <span class="text-xs text-gray-400">A partir de</span>
+                                <div class="text-base font-bold text-gray-900">R$ ${product.price.toFixed(2).replace('.', ',')}</div>
+                            </div>
+                            
+                            ${qty === 0 ? `
+                                <button onclick="addToCart('${product.name}')" class="w-8 h-8 rounded-full border border-red-200 text-red-600 flex items-center justify-center hover:bg-red-50 transition-colors">
+                                    <i class="fas fa-plus text-xs"></i>
+                                </button>
+                            ` : `
+                                <div class="flex items-center bg-gray-50 rounded-lg border border-gray-200">
+                                    <button onclick="removeFromCart('${product.name}')" class="w-8 h-8 flex items-center justify-center text-red-600 font-bold hover:bg-gray-100 rounded-l-lg">-</button>
+                                    <span class="w-6 text-center text-sm font-medium text-gray-800">${qty}</span>
+                                    <button onclick="addToCart('${product.name}')" class="w-8 h-8 flex items-center justify-center text-red-600 font-bold hover:bg-gray-100 rounded-r-lg">+</button>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function setupSearch() {
+            const input = document.getElementById('searchInput');
+            input.addEventListener('input', (e) => {
+                const term = e.target.value.trim();
+                if (term.length > 0) {
+                    renderProducts(term);
+                    // Reset category visual state
+                    document.querySelectorAll('.category-item').forEach(b => b.classList.remove('active'));
+                } else {
+                    selectCategory('Todos');
+                }
+            });
+        }
+
+        /* --- CARRINHO --- */
+        function addToCart(productName) {
+            if (!cart[productName]) {
+                const product = rawProducts.find(p => p.name === productName);
+                cart[productName] = { ...product, qty: 1 };
+                showToast(`Adicionado: ${product.name.substring(0, 15)}...`);
+            } else {
+                cart[productName].qty++;
+            }
+            updateCartUI();
+        }
+
+        function removeFromCart(productName) {
+            if (cart[productName]) {
+                cart[productName].qty--;
+                if (cart[productName].qty <= 0) {
+                    delete cart[productName];
+                }
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            // Re-render current list to show qty buttons
+            // Optimization: In a real app we would update DOM directly, here we re-render for simplicity
+            renderProducts(document.getElementById('searchInput').value);
+
+            // Calculate totals
+            const items = Object.values(cart);
+            const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+            const totalPrice = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            // Update Floating Bar
+            const cartBar = document.getElementById('cartBar');
+            document.getElementById('cartTotal').innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
+            document.getElementById('cartCount').innerText = `${totalQty} itens`;
+
+            if (totalQty > 0) {
+                cartBar.classList.remove('translate-y-full');
+            } else {
+                cartBar.classList.add('translate-y-full');
+                closeCheckout(); // Close modal if empty
+            }
+        }
+
+        /* --- CHECKOUT --- */
+        function openCheckout() {
+            const modal = document.getElementById('checkoutModal');
+            const content = document.getElementById('modalContent');
+            const list = document.getElementById('cartItemsList');
+
+            // Render Cart Items
+            list.innerHTML = Object.values(cart).map(item => `
+                <div class="flex justify-between items-start border-b border-gray-50 pb-2">
+                    <div class="flex gap-2">
+                        <span class="text-green-600 font-bold text-sm mt-0.5">${item.qty}x</span>
+                        <div>
+                            <p class="text-sm text-gray-800 leading-tight mb-1">${item.name}</p>
+                            <p class="text-xs text-gray-500">Unit: R$ ${item.price.toFixed(2).replace('.', ',')}</p>
+                        </div>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">R$ ${(item.price * item.qty).toFixed(2).replace('.', ',')}</span>
+                </div>
+            `).join('');
+
+            // Totals
+            const totalPrice = Object.values(cart).reduce((sum, item) => sum + (item.price * item.qty), 0);
+            document.getElementById('modalSubtotal').innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
+            document.getElementById('modalTotal').innerText = `R$ ${totalPrice.toFixed(2).replace('.', ',')}`;
+
+            // Show Modal
+            modal.classList.remove('hidden');
+            // Small delay for animation
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('translate-y-full');
+                content.classList.add('sm:translate-y-0'); // Mobile handles full translate, desktop 0
+            }, 10);
+        }
+
+        function closeCheckout() {
+            const modal = document.getElementById('checkoutModal');
+            const content = document.getElementById('modalContent');
+            
+            content.classList.add('translate-y-full');
+            content.classList.remove('sm:translate-y-0');
+            modal.classList.add('opacity-0');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        /* --- WHATSAPP --- */
+        function sendOrder() {
+            const name = document.getElementById('customerName').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+            const payment = document.getElementById('paymentMethod').value;
+
+            if (!name || !address) {
+                alert('Por favor, preencha seu nome e endereço para entrega.');
+                return;
+            }
+
+            const items = Object.values(cart);
+            if (items.length === 0) return;
+
+            const total = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            
+            // Build Message
+            let msg = `*NOVO PEDIDO - FERNANFRIOS APP*\n\n`;
+            msg += `*Cliente:* ${name}\n`;
+            msg += `*Endereço:* ${address}\n`;
+            msg += `*Pagamento:* ${payment}\n\n`;
+            msg += `*RESUMO DO PEDIDO:*\n`;
+            
+            items.forEach(item => {
+                msg += `▪ ${item.qty}x ${item.name}\n   (R$ ${(item.price * item.qty).toFixed(2).replace('.', ',')})\n`;
+            });
+
+            msg += `\n*TOTAL: R$ ${total.toFixed(2).replace('.', ',')}*\n`;
+            msg += `--------------------------------\n`;
+            msg += `_EXEMPLO DE PEDIDO - GERADO POR DGOUVEI4_`;
+
+            // WhatsApp Link
+            const phone = "5517981112074";
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+            
+            window.open(url, '_blank');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toastMsg');
+            msg.innerText = message;
+            
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('animate-bounce'); // small bounce
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+                toast.classList.remove('animate-bounce');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
